@@ -261,6 +261,9 @@ typedef struct
 }  _Mbuffer;
 
 
+
+
+
 extern _Mbuffer Mb;
 
 

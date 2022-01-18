@@ -100,8 +100,10 @@ void GPIO_init (void)
 
 
 void ESC_safeoutput_override(void){
+
+    DPRINT ("APP_safeoutput\n");
 // Set safe values for digitals
-    //    Obj.out.digital_0 = 0;
+        Obj.out.digital_0 = 0;
 }
 #define MAX_TIME_WAIT_SYNC0 4000
 
@@ -137,7 +139,7 @@ _Noreturn int main_run (void * arg)
       .post_state_change_hook = NULL,
       .application_hook = NULL,
 //      .safeoutput_override = ESC_safeoutput_override,
-      .safeoutput_override = NULL,
+      .safeoutput_override = ESC_safeoutput_override,
       .pre_object_download_hook = NULL,
       .post_object_download_hook = NULL,
       .rxpdo_override = NULL,
