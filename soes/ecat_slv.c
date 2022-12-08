@@ -8,6 +8,8 @@
 #include "esc_foe.h"
 #include "esc_eoe.h"
 #include "ecat_slv.h"
+#include "log.h"
+#include "user_message.h"
 
 #define IS_RXPDO(index) ((index) >= 0x1600 && (index) < 0x1800)
 #define IS_TXPDO(index) ((index) >= 0x1A00 && (index) < 0x1C00)
@@ -71,7 +73,9 @@ uint32_t ESC_download_pre_objecthandler (uint16_t index,
 }
 
 /** Hook called from the slave stack SDO Download handler to act on
- * user specified Index and Sub-index.
+ * user sp
+ *
+ * ecified Index and Sub-index.
  *
  * @param[in] index      = index of SDO download request to handle
  * @param[in] sub-index  = sub-index of SDO download request to handle
@@ -133,7 +137,6 @@ uint32_t ESC_upload_post_objecthandler (uint16_t index, uint8_t subindex, uint16
  */
 void APP_safeoutput (void)
 {
-   DPRINT ("APP_safeoutput\n");
 
    if(ESCvar.safeoutput_override != NULL)
    {
@@ -156,8 +159,6 @@ void TXPDO_update (void)
          COE_pdoPack (txpdo, ESCvar.sm3mappings, SMmap3);
       }
 
-//      txpdo[0]=128;
-//       txpdo[1]=128;
       ESC_write (ESC_SM3_sma, txpdo, ESCvar.ESC_SM3_sml);
    }
 }
@@ -211,7 +212,8 @@ void DIG_process (uint8_t flags)
       if ((CC_ATOMIC_GET(watchdog) <= 0) &&
           ((CC_ATOMIC_GET(ESCvar.App.state) & APPSTATE_OUTPUT) > 0))
       {
-         DPRINT("DIG_process watchdog expired\n");
+
+         LL_ERROR(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: DIG_process watchdog expired");
          ESC_ALstatusgotoerror((ESCsafeop | ESCerror), ALERR_WATCHDOG);
       }
       else if(((CC_ATOMIC_GET(ESCvar.App.state) & APPSTATE_OUTPUT) == 0))
@@ -220,19 +222,19 @@ void DIG_process (uint8_t flags)
       }
    }
 
-   printf("Alevent: %u\n", ESCvar.ALevent);
+    LL_TRACE(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: Alevent [0x%x]", ESCvar.ALevent);
 
-    if ((flags & DIG_PROCESS_OUTPUTS_FLAG) > 0){
-        printf("true1\n");
-    }
-
-if((CC_ATOMIC_GET(ESCvar.App.state) & APPSTATE_OUTPUT) > 0){
-        printf("true2\n");
-    }
-
-if(         (ESCvar.ALevent & ESCREG_ALEVENT_SM2)){
-    printf("true3\n");
-}
+//    if ((flags & DIG_PROCESS_OUTPUTS_FLAG) > 0){
+//        printf("true1\n");
+//    }
+//
+//if((CC_ATOMIC_GET(ESCvar.App.state) & APPSTATE_OUTPUT) > 0){
+//        printf("true2\n");
+//    }
+//
+//if(         (ESCvar.ALevent & ESCREG_ALEVENT_SM2)){
+//    printf("true3\n");
+//}
 
 
 
@@ -246,12 +248,10 @@ if(         (ESCvar.ALevent & ESCREG_ALEVENT_SM2)){
          RXPDO_update();
          CC_ATOMIC_SET(watchdog, ESCvar.watchdogcnt);
          /* Set outputs */
-          printf("cb_set_outputs\n");
          cb_set_outputs();
       }
       else if (ESCvar.ALevent & ESCREG_ALEVENT_SM2)
       {
-          printf("op here\n");
          RXPDO_update();
       }
    }
@@ -265,8 +265,7 @@ if(         (ESCvar.ALevent & ESCREG_ALEVENT_SM2)){
          (ESCvar.application_hook)();
       }
    }
-    DPRINT ("App.state: %d\n", ESCvar.App.state);
-    DPRINT ("AlStatus : 0x%x, AlError : 0x%x, watchdog: %d\n", (ESCvar.ALstatus & 0x001f),ESCvar.ALerror, ESCvar.watchdogcnt);
+    LL_TRACE(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: AlStatus [0x%x], AlError [0x%x], watchdog [%d], App.state [%d]", (ESCvar.ALstatus & 0x001f),ESCvar.ALerror, ESCvar.watchdogcnt, ESCvar.App.state);
    /* Handle Inputs */
    if ((flags & DIG_PROCESS_INPUTS_FLAG) > 0)
    {
@@ -381,17 +380,17 @@ void ecat_slv (void)
  */
 void ecat_slv_init (esc_cfg_t * config)
 {
-   DPRINT ("Slave stack init started\n");
+    LL_TRACE(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: Slave stack init started");
 
    /* Init watchdog */
    watchdog = config->watchdog_cnt;
 
    /* Call stack configuration */
    ESC_config (config);
-   DPRINT ("ESC_config complete\n");
+    LL_TRACE(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: ESC_config complete");
    /* Call HW init */
    ESC_init (config);
-    DPRINT ("ESC_init complete\n");
+    LL_TRACE(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: ESC_init complete");
 
    /*  wait until ESC is started up */
    while ((ESCvar.DLstatus & 0x0001) == 0)
@@ -400,7 +399,7 @@ void ecat_slv_init (esc_cfg_t * config)
                 sizeof (ESCvar.DLstatus));
       ESCvar.DLstatus = etohs (ESCvar.DLstatus);
    }
-    DPRINT ("ESC started up\n");
+    LL_TRACE(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: ESC started up");
 
 #if USE_FOE
    /* Init FoE */

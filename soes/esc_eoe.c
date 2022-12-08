@@ -517,7 +517,7 @@ static void EOE_get_ip (void)
 
    if(port  > EOE_NUMBER_OF_PORTS)
    {
-      DPRINT("Invalid port\n");
+      DPRINT("Invalid port");
       /* Return error response on given port */
       EOE_no_data_response((EOE_HDR_FRAME_PORT_SET(port) |
             EOE_INIT_RESP |
@@ -635,7 +635,7 @@ static void EOE_set_ip (void)
 
    if(port  > EOE_NUMBER_OF_PORTS)
    {
-      DPRINT("Invalid port\n");
+      DPRINT("Invalid port");
       /* Return error response on given port */
       EOE_no_data_response((EOE_HDR_FRAME_PORT_SET(port) |
             EOE_INIT_RESP |
@@ -738,7 +738,7 @@ static void EOE_receive_fragment (void)
    /* Capture error case */
    if(EOEvar.rxfragmentno != EOE_HDR_FRAG_NO_GET(frameinfo2))
    {
-      DPRINT("Unexpected fragment number %d, expected: %d\n",
+      DPRINT("Unexpected fragment number %d, expected: %d",
             EOE_HDR_FRAG_NO_GET(frameinfo2), EOEvar.rxfragmentno);
       /* Clean up existing saved data */
       if(EOEvar.rxfragmentno != 0)
@@ -771,14 +771,14 @@ static void EOE_receive_fragment (void)
       /* Validate received fragment */
       if(EOEvar.rxframeno != EOE_HDR_FRAME_NO_GET(frameinfo2))
       {
-         DPRINT("Unexpected frame number %d, expected: %d\n",
+         DPRINT("Unexpected frame number %d, expected: %d",
                EOE_HDR_FRAME_NO_GET(frameinfo2), EOEvar.rxframeno);
          EOE_init_rx ();
          return;
       }
       else if(EOEvar.rxframeoffset != offset)
       {
-         DPRINT("Unexpected frame offset %d, expected: %d\n",
+         DPRINT("Unexpected frame offset %d, expected: %d",
                offset, EOEvar.rxframeoffset);
          EOE_init_rx ();
          return;
@@ -796,7 +796,7 @@ static void EOE_receive_fragment (void)
    }
    else
    {
-      DPRINT("Size of data exceed available buffer size\n");
+      DPRINT("Size of data exceed available buffer size");
       EOE_init_rx ();
       return;
    }
@@ -960,7 +960,7 @@ static void EOE_init_tx ()
  */
 void EOE_init ()
 {
-   DPRINT("EOE_init\n");
+   DPRINT("EOE_init");
    EOE_init_tx ();
    EOE_init_rx ();
 }
@@ -1037,7 +1037,7 @@ void ESC_eoeprocess (void)
             case EOE_GET_ADDR_FILTER_RESP:
             default:
             {
-               DPRINT("EOE_RESULT_UNSUPPORTED_TYPE\n");
+               DPRINT("EOE_RESULT_UNSUPPORTED_TYPE");
                EOE_no_data_response ((EOE_HDR_FRAME_PORT & frameinfo1) |
                      (EOE_HDR_FRAME_TYPE & frameinfo1) |
                      EOE_HDR_LAST_FRAGMENT,

@@ -149,7 +149,7 @@ static uint16_t FOE_fwrite (uint8_t *data, uint16_t length)
     uint16_t ncopied = 0;
     uint32_t failed = 0;
 
-    DPRINT("FOE_fwrite\n");
+    DPRINT("FOE_fwrite");
     FOEvar.fprevposition = FOEvar.fposition;
     while (length && (FOEvar.fend - FOEvar.fposition) && !failed)
     {
@@ -181,7 +181,7 @@ static uint32_t FOE_fclose (void)
 {
    uint32_t failed = 0;
 
-   DPRINT("FOE_fclose\n");
+   DPRINT("FOE_fclose");
    
    failed = foe_file->write_function (foe_file, foe_cfg->fbuffer, FOEvar.fbufposition);
    foe_file->address_offset += FOEvar.fbufposition;
@@ -195,7 +195,7 @@ static uint32_t FOE_fclose (void)
  */
 void FOE_init ()
 {
-   DPRINT("FOE_init\n");
+   DPRINT("FOE_init");
    FOEvar.foepacket = 0;
    FOEvar.foestate = FOE_READY;
    FOEvar.fposition = 0;
@@ -227,7 +227,7 @@ static void FOE_abort (uint32_t code)
       }
       /* Nothing we can do if we can't get an outbound mailbox. */
    }
-   DPRINT("FOE_abort: 0x%X\n", code);
+   DPRINT("FOE_abort: 0x%X", code);
    FOE_init ();
 }
 
@@ -281,7 +281,7 @@ static int FOE_send_ack ()
    mbxhandle = ESC_claimbuffer ();
    if (mbxhandle)
    {
-      DPRINT("FOE_send_ack\n");
+      DPRINT("FOE_send_ack");
       foembx = (_FOE *) &MBX[mbxhandle * ESC_MBXSIZE];
       foembx->mbxheader.length = htoes (ESC_FOEHSIZE);
       foembx->mbxheader.mbxtype = MBXFOE;
@@ -293,7 +293,7 @@ static int FOE_send_ack ()
    }
    else
    {
-      DPRINT("ERROR:FOE_send_ack\n");
+      DPRINT("ERROR:FOE_send_ack");
       return FOE_ERR_PROGERROR;
    }
 }
@@ -444,19 +444,19 @@ static void FOE_data ()
 
    if (packet != FOEvar.foepacket)
    {
-      DPRINT("FOE_data packet error, packet: %d, foeheader.packet: %d\n",packet,FOEvar.foepacket);
+      DPRINT("FOE_data packet error, packet: %d, foeheader.packet: %d",packet,FOEvar.foepacket);
       FOE_abort (FOE_ERR_PACKETNO);
    }
    else if (data_len == 0)
    {
-      DPRINT("FOE_data completed\n");
+      DPRINT("FOE_data completed");
       FOE_fclose ();
       res = FOE_send_ack ();
       FOE_init ();
    }
    else if (FOEvar.fposition + data_len > FOEvar.fend)
    {
-      DPRINT("FOE_data disk full\n");
+      DPRINT("FOE_data disk full");
       FOE_abort (FOE_ERR_DISKFULL);
    }
    else
@@ -464,15 +464,15 @@ static void FOE_data ()
       ncopied = FOE_fwrite (foembx->data, data_len);
       if (!ncopied)
       {
-         DPRINT("FOE_data no copied\n");
+         DPRINT("FOE_data no copied");
          FOE_abort (FOE_ERR_PROGERROR);
       }
       else if (data_len == ESC_FOE_DATA_SIZE)
       {
-         DPRINT("FOE_data data_len == FOE_DATA_SIZE\n");
+         DPRINT("FOE_data data_len == FOE_DATA_SIZE");
          if (ncopied != data_len)
          {
-            DPRINT("FOE_data only %d of %d copied\n",ncopied, data_len);
+            DPRINT("FOE_data only %d of %d copied",ncopied, data_len);
             FOE_abort (FOE_ERR_PROGERROR);
          }
          res = FOE_send_ack ();
@@ -485,12 +485,12 @@ static void FOE_data ()
       {
          if ((ncopied != data_len) || FOE_fclose ())
          {
-            DPRINT("FOE_fclose failed to write extra buffer\n");
+            DPRINT("FOE_fclose failed to write extra buffer");
             FOE_abort (FOE_ERR_PROGERROR);
          }
          else
          {
-            DPRINT("FOE_data completed\n");
+            DPRINT("FOE_data completed");
             res = FOE_send_ack ();
             FOE_init ();
          }
@@ -576,46 +576,46 @@ void ESC_foeprocess (void)
          {
             case FOE_OP_WRQ:
             {
-               DPRINT("FOE_OP_WRQ\n");
+               DPRINT("FOE_OP_WRQ");
                FOE_write ();
                break;
             }
             case FOE_OP_DATA:
             {
-               DPRINT("FOE_OP_DATA\n");
+               DPRINT("FOE_OP_DATA");
                FOE_data ();
                break;
             }
 #ifdef FOE_READ_SUPPORTED
             case FOE_OP_RRQ:
             {
-               DPRINT("FOE_OP_RRQ\n");
+               DPRINT("FOE_OP_RRQ");
                FOE_read ();
                break;
             }
             case FOE_OP_ACK:
             {
-               DPRINT("FOE_OP_ACK\n");
+               DPRINT("FOE_OP_ACK");
                FOE_ack ();
                break;
             }
 
             case FOE_OP_BUSY:
             {
-               DPRINT("FOE_OP_BUSY\n");
+               DPRINT("FOE_OP_BUSY");
                FOE_busy ();
                break;
             }
 #endif
             case FOE_OP_ERR:
             {
-               DPRINT("FOE_OP_ERR\n");
+               DPRINT("FOE_OP_ERR");
                FOE_error ();
                break;
             }
             default:
             {
-               DPRINT("FOE_ERR_NOTDEFINED\n");
+               DPRINT("FOE_ERR_NOTDEFINED");
                FOE_abort (FOE_ERR_NOTDEFINED);
                break;
             }

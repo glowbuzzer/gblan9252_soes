@@ -51,7 +51,9 @@ else()
     message (STATUS "BCM2835 NOT found")
 endif()
 
-include_directories(${BCM2835_INCLUDE_DIRS} ${gbnetx_config_BINARY_DIR} soes inc soes/hal/raspberrypi-lan9252 soes/include/sys/gcc)
+include_directories(${BCM2835_INCLUDE_DIRS} ${gblan9252_soes_config_BINARY_DIR} soes inc soes/hal/raspberrypi-lan9252 soes/include/sys/gcc)
+
+message(STATUS "${gblan9252_soes_config_BINARY_DIR}")
 
 set(SOURCE_FILES
         src/main.c
@@ -93,11 +95,12 @@ else ()
     MESSAGE(STATUS "GB: Loading [gblan9252_soes_defs_linux.cmake]")
     include(cmake/gblan9252_soes_defs_linux.cmake)
     if (EXISTS cmake/gblan9252_soes_custom_defs_linux.cmake)
-        MESSAGE(STATUS "GB: Loading [gblan9252_soes_custom_defs_linuxc.make]")
+        MESSAGE(STATUS "GB: Loading [gblan9252_soes_custom_defs_linux.cmake]")
         include(cmake/gblan9252_soes_custom_defs_linux.cmake)
     else ()
         MESSAGE(STATUS "GB: gblan9252_soes_custom_defs_linux.cmake does NOT exist (no overrides for standard definitions will be used)")
     endif ()
 
 endif ()
+
 configure_file(cmake/gblan9252_soes_config_autogen.h.in libs/gblan9252_soes_config/gblan9252_soes_config_autogen.h)

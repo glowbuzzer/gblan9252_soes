@@ -15,7 +15,7 @@
 #ifndef GBLAN9252_SOES_CONFIG_H
 #define GBLAN9252_SOES_CONFIG_H
 
-#include "gblan9252_soes__config_autogen.h"
+#include "gblan9252_soes_config_autogen.h"
 
 
 /** This defines the size of the stack in bytes allocated to the main ecrxtx thread */
@@ -29,6 +29,8 @@
 /** Max length of string for gbc process name */
 #define GBC_PROCESS_NAME_MAX_LENGTH                     100
 
+
+#define MAX_TIME_WAIT_SYNC0 4000
 
 
 #endif //GBLAN9252_SOES_CONFIG_H

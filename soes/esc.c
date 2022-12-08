@@ -7,6 +7,8 @@
 #include "esc.h"
 #include "esc_coe.h"
 #include "esc_foe.h"
+#include "log.h"
+#include "user_message.h"
 
 /** \file
  * \brief
@@ -250,11 +252,8 @@ uint16_t ESC_checkDC (void)
 {
    uint16_t ret = 0;
 
-//    for (int i = 0; i < 10; ++i) {
+    LL_TRACE(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: ESC_checkDC");
 
-
-        DPRINT("Im ESC_checkDC\n");
-//    }
    uint8_t sync_act = ESC_SYNCactivation();
    /* Do we need to check sync settings? */
    if((sync_act & (ESCREG_SYNC_ACT_ACTIVATED | ESCREG_SYNC_AUTO_ACTIVATED)) > 0)
@@ -1144,7 +1143,6 @@ void ESC_state (void)
    }
 
    ESC_ALstatus (an);
-   DPRINT ("state %x\n", an);
 }
 /** Function copying the application configuration variable
  * data to the stack local variable.

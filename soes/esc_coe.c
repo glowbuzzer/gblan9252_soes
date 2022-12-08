@@ -155,7 +155,7 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
             {
 
                uint32_t value = OBJ_VALUE_FETCH (value, objd[c]);
-               DPRINT("Bitlength: %u\n", value);
+               DPRINT("Bitlength: %u", value);
                uint8_t bitlength = value & 0xFF;
 
                if (max_mappings > 0)
@@ -168,11 +168,11 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
                   {
                      /* Too many mapped objects */
                      *nmappings = -1;
-                     DPRINT("Too many mapped objects\n");
+                     DPRINT("Too many mapped objects");
                      return 0;
                   }
 
-                  DPRINT ("%04x:%02x @ %d\n", index, subindex, offset);
+                  DPRINT ("%04x:%02x @ %d", index, subindex, offset);
 
                   if (index == 0 && subindex == 0)
                   {
@@ -191,7 +191,7 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
                         {
                            /* Mapped subindex does not exist */
                            *nmappings = -1;
-                           DPRINT("Mapped subindex does not exist\n");
+                           DPRINT("Mapped subindex does not exist");
                            return 0;
                         }
 
@@ -201,7 +201,7 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
                      {
                         /* Mapped index does not exist */
                         *nmappings = -1;
-                         DPRINT("Mapped index does not exist\n");
+                         DPRINT("Mapped index does not exist");
                         return 0;
                      }
                   }
@@ -210,7 +210,7 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
                   mappings[mapIx++].offset = offset;
                }
 
-               DPRINT("Bitlength: %u\n", bitlength);
+               DPRINT("Bitlength: %u", bitlength);
                offset += bitlength;
             }
          }
@@ -220,7 +220,7 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
    if (max_mappings > 0)
    {
       *nmappings = mapIx;
-      DPRINT("nmappings: %u\n", mapIx);
+      DPRINT("nmappings: %u", mapIx);
    }
    else
    {
@@ -228,7 +228,7 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
    }
 
 //   offset=928;
-   DPRINT("Size of POD: %u\n",BITS2BYTES (offset) );
+   DPRINT("Size of POD: %u",BITS2BYTES (offset) );
    return BITS2BYTES (offset);
 }
 
@@ -1705,8 +1705,11 @@ static void COE_setValue (const _objd * obj, uint64_t value)
       *(uint64_t *)obj->data = value;
       break;
 
+       case DTYPE_VISIBLE_STRING:
+           DPRINT ("Value ignored (DTYPE_VISIBLE_STRING)");
+           break;
    default:
-      DPRINT ("ignored\n");
+      DPRINT ("Value ignored [%u]", obj->datatype);
       break;
    }
 }
@@ -1732,14 +1735,13 @@ void COE_initDefaultValues (void)
    {
       objd = SDOobjects[n].objdesc;
       maxsub = SDOobjects[n].maxsub;
-DPRINT("maxsub: %u\n", maxsub );
       i = 0;
       do
       {
          if (objd[i].data != NULL)
          {
             COE_setValue (&objd[i], objd[i].value);
-            DPRINT ("Set default SDO -> %04x:%02x = %x\n", SDOobjects[n].index, objd[i].subindex, objd[i].value);
+            DPRINT ("Set default SDO -> %04x:%02x = %x", SDOobjects[n].index, objd[i].subindex, objd[i].value);
          }
       } while (objd[i++].subindex < maxsub);
    }

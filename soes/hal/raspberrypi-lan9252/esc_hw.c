@@ -19,6 +19,9 @@
 #include <bcm2835.h>
 #include "ecat_options.h"
 #include "utypes.h"
+#include "log.h"
+#include "user_message.h"
+
 
 #define BIT(x)	(1U << (x))
 
@@ -440,6 +443,8 @@ void ESC_reset (void)
 
 }
 
+
+
 void ESC_init (const esc_cfg_t * config)
 {
    bool rpi4 = true, cs1 = false;
@@ -482,13 +487,13 @@ void ESC_init (const esc_cfg_t * config)
          {
             // Raspberry 4 due to a higher CPU speed this value is to change to: BCM2835_SPI_CLOCK_DIVIDER_32
             bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);
-            DPRINT("bcm2835_spi_setClockDivider set to 32 \n");
+             UM_INFO(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: bcm2835_spi_setClockDivider set to 32");
          }
          else
          {
             // Set SPI clock speed BCM2835_SPI_CLOCK_DIVIDER_16 = 16, 16 = 64ns = 15.625MHz
             bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_16);
-            DPRINT("bcm2835_spi_setClockDivider set to 16 \n");
+             UM_INFO(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: bcm2835_spi_setClockDivider set to 16");
          }
          if (cs1)
          {
@@ -496,7 +501,7 @@ void ESC_init (const esc_cfg_t * config)
             bcm2835_spi_chipSelect(BCM2835_SPI_CS1);
             // Enable CS1 and set polarity
             bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS1, LOW);
-            DPRINT("bcm2835_spi_chipSelect set to CS1 \n");
+             UM_INFO(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: bcm2835_spi_chipSelect set to CS1");
          }
          else
          {
@@ -504,12 +509,12 @@ void ESC_init (const esc_cfg_t * config)
             bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
             // enable CS0 and set polarity
             bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
-            DPRINT("bcm2835_spi_chipSelect set to CS0 \n");
+             UM_INFO(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: bcm2835_spi_chipSelect set to CS0");
+
          }
 
          // Reset the ecat core here due to evb-lan9252-digio not having any GPIO for that purpose.
          bcm2835_spi_write_32(ESC_CMD_RESET_CTL,ESC_RESET_CTRL_RST);
-
 
          // Wait until reset command has been executed
          do
@@ -517,7 +522,6 @@ void ESC_init (const esc_cfg_t * config)
             usleep(100);
             counter++;
             value = bcm2835_spi_read_32(ESC_CMD_RESET_CTL);
-            printf("%u\n", counter);
          } while ((value & ESC_RESET_CTRL_RST) && (counter < timeout));
 
          // Perform byte test
@@ -526,7 +530,6 @@ void ESC_init (const esc_cfg_t * config)
             usleep(100);
             counter++;
             value = bcm2835_spi_read_32(ESC_CMD_BYTE_TEST);
-             printf("%u\n", counter);
          } while ((value != ESC_BYTE_TEST_OK) && (counter < timeout));
 
          // Check hardware is ready
@@ -535,7 +538,6 @@ void ESC_init (const esc_cfg_t * config)
             usleep(100);
             counter++;
             value = bcm2835_spi_read_32(ESC_CMD_HW_CFG);
-             printf("%u\n", counter);
          } while (!(value & ESC_HW_CFG_READY) && (counter < timeout));
 
          // Check if timeout occured - cumlative
@@ -543,7 +545,7 @@ void ESC_init (const esc_cfg_t * config)
          {
             // Read the chip identification and revision
             value = bcm2835_spi_read_32(ESC_CMD_ID_REV);
-            DPRINT("Detected chip %x Rev %u \n", ((value >> 16) & 0xFFFF), (value & 0xFFFF));
+             UM_INFO(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: Detected chip [0x%x] Rev [%u]", ((value >> 16) & 0xFFFF), (value & 0xFFFF));
 
             // Set AL event mask
             value = (ESCREG_ALEVENT_CONTROL |
@@ -561,44 +563,38 @@ void ESC_init (const esc_cfg_t * config)
             if ((ESCvar.use_interrupt != 0) &&
                (ESCvar.esc_hw_interrupt_enable != NULL))
             {
-                DPRINT("hw interrupt enable\n");
+                LL_DEBUG(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: Hardware interrupts are enabled");
                ESCvar.esc_hw_interrupt_enable (ESCREG_ALEVENT_DC_SYNC0 | ESCREG_ALEVENT_SM2 );
             }
-
-
-
          }
          else
          {
-            DPRINT("Timeout occurred during reset \n");
+             UM_ERROR(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: Timeout during chip reset");
             bcm2835_spi_end();
             bcm2835_close();
          }
       }
       else
       {
-         DPRINT("bcm2835_spi_begin failed. Are you running as root?\n");
+          UM_ERROR(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: bcm2835_spi_begin failed. Are you running as root?");
          bcm2835_close();
       }
    }
    else
    {
-      DPRINT("bcm2835_init failed. Are you running as root?\n");
+       UM_ERROR(GBLAN9252_SOES_UM_EN, "GBLAN9252_SOES: bcm2835_init failed. Are you running as root?");
    }
 }
 
 void ESC_interrupt_enable (uint32_t mask)
 {
-    DPRINT("Start enabling interrupt\n");
    if (ESCREG_ALEVENT_DC_SYNC0 & mask)
    {
-       DPRINT("Write event mask - ESCREG_ALEVENT_DC_SYNC0\n");
       // Enable interrupt from SYNC0
       ESC_ALeventmaskwrite(ESC_ALeventmaskread() | ESCREG_ALEVENT_DC_SYNC0);
    }
    if (ESCREG_ALEVENT_SM2 & mask)
    {
-       DPRINT("Write event mask - ESCREG_ALEVENT_SM2\n");
       // Enable interrupt from SYNC0
       ESC_ALeventmaskwrite(ESC_ALeventmaskread() | ESCREG_ALEVENT_SM2);
    }
@@ -610,7 +606,6 @@ void ESC_interrupt_enable (uint32_t mask)
    // Enable LAN9252 interrupt
    bcm2835_spi_write_32(ESC_CMD_INT_EN, 0x00000001);
 
-   DPRINT("End enabling interrupt\n");
 }
 
 void ESC_interrupt_disable (uint32_t mask)
@@ -646,22 +641,22 @@ uint16_t dc_checker (void)
     if(COE_getSyncMgrPara(0x1c32, 0x4, &sync_type_supported1c32, DTYPE_UNSIGNED16) == 0)
     {
         ret = ALERR_DCINVALIDSYNCCFG;
-        DPRINT("sync type supported==0\n");
+        DPRINT("sync type supported==0");
     }
     else if(COE_getSyncMgrPara(0x1c32, 0x5, &mincycletime, DTYPE_UNSIGNED32) == 0)
     {
         ret = ALERR_DCINVALIDSYNCCFG;
-        DPRINT("min cycle time==0\n");
+        DPRINT("min cycle time==0");
     }
     else if(COE_getSyncMgrPara(0x10F1, 0x2, &ESCvar.synccounterlimit, DTYPE_UNSIGNED16) == 0)
     {
         ret = ALERR_DCINVALIDSYNCCFG;
-        DPRINT("sync counter limit==0\n");
+        DPRINT("sync counter limit==0");
     }
     else if((sync_act & (ESCREG_SYNC_SYNC0_EN | ESCREG_SYNC_SYNC1_EN)) == 0)
     {
         ret = ALERR_DCINVALIDSYNCCFG;
-        DPRINT("no sync 0 or sync 1\n");
+        DPRINT("no sync 0 or sync 1");
     }
         /* Do we support activated signals */
     else if(((sync_type_supported1c32 & SYNCTYPE_SUPPORT_DCSYNC0) == 0) &&

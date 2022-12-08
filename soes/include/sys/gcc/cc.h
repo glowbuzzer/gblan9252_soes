@@ -6,11 +6,14 @@
 #ifndef CC_H
 #define CC_H
 
+
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#include "log.h"
 #include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -80,8 +83,12 @@ extern "C"
 #endif
 #else
 #include <stdio.h>
-#define DPRINT(...) printf ("soes: "__VA_ARGS__)
+//#define DPRINT(...) printf ("soes: "__VA_ARGS__)
+#define DPRINT(...)  LL_DEBUG(GBLAN9252_SOES_GEN_LOG_EN, "GBLAN9252_SOES: "__VA_ARGS__);
+
 #endif
+
+
 
 #ifdef __cplusplus
 }
